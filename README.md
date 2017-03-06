@@ -1,2 +1,2 @@
 # MGNE
-Multiplayer Game Network Engine
+Multiplayer Game Network Engine Library
