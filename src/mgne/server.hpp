@@ -1,11 +1,11 @@
 #ifndef _SERVER_HPP_
 #define _SERVER_HPP_
 
-namespace mgne {
+namespace mgne::tcp {
 class Server {
- public:
+public:
 
- private:
+private:
 
 };
 
