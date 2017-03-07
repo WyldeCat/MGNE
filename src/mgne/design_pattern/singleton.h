@@ -1,3 +1,5 @@
+#ifndef _SINGLETON_H_
+#define _SINGLETON_H_
 
 template <class T>
 class Singleton {
@@ -10,6 +12,8 @@ class Singleton {
   void get_instance() {
     return instance;
   }
-  virtual void init() = 0;
+  virtual void init(void* data) = 0;
   virtual void release() = 0;
 };
+
+#endif
