@@ -10,7 +10,7 @@ protected:
   ~Singleton() { }
  
 public:
-  void get_instance() {
+  T* get_instance() {
     return instance;
   }
   virtual void init(void* data) = 0;
@@ -18,5 +18,7 @@ public:
 };
 
 }
+template <class T>
+T* mgne::pattern::Singleton<T>::instance;
 
 #endif

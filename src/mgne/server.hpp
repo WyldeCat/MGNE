@@ -4,7 +4,7 @@
 namespace mgne::tcp {
 class Server {
 public:
-
+  
 private:
 
 };
