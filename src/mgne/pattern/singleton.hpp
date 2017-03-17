@@ -1,3 +1,7 @@
+//
+// singleton.hpp
+//
+
 #ifndef _SINGLETON_HPP_
 #define _SINGLETON_HPP_
 
@@ -16,7 +20,6 @@ public:
   virtual void init(void* data) = 0;
   virtual void release() = 0;
 };
-
 }
 template <class T>
 T* mgne::pattern::Singleton<T>::instance;
