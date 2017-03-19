@@ -19,9 +19,11 @@
 namespace mgne::tcp {
 class SessionManager {
 public:
-  SessionManager(size_t capacity, Server& server)
+  SessionManager(size_t capacity, size_t num_threads, Server& server)
     : server_(server)
     , capacity_(capacity) 
+    , num_threads_(num_threads)
+    , io_services_(num_threads)
   {
     for (int i = 0; i < capacity_; i++) {
       sessions_.push_back(new Session(i, this)); 
@@ -31,35 +33,32 @@ public:
 
   ~SessionManager() 
   {
-    for (int i = 0; i < capacity_; i++) {
-      delete sessions_[i];
-    }
-    for (int i = 0; i < io_services_.size(); i++) {
-      delete io_services_[i];
-    }
-    delete acceptor_;
+    for (int i = 0; i < capacity_; i++) delete sessions_[i];
+    if (acceptor_ != NULL) delete acceptor_;
   }
 
-  void StartAccepting(size_t num_threads, ThreadManager& thread_manager)
+  void StartAccepting()
   {
-    io_services_.push_back(new boost::asio::io_service);
-    acceptor_ = new boost::asio::ip::tcp::acceptor(*io_service_back(),
+    acceptor_ = new boost::asio::ip::tcp::acceptor(io_services.front(),
       server_.GetEndPoint());
     ::accept();
-    for (int i = 0; i < num_threads; i++) {
-      thread_manager.CreateThread(io_services_back()->run());
+    for (int i = 0; i < num_threads_; i++) {
+      // TODO Apply thread manager
+      // create_thread(io_services[i].run);
     }
-  }
-
-  boost::asio::io_service& GetIOService(int id)
-  {
-    return io_services[id%num_threads_];
   }
 
   const Server& GetServer()
   {
     return server_; 
   }
+
+  boost::asio::io_service& get_io_service_i(int id)
+  {
+    if (num_threads_ == 1) return io_services[0];
+    return io_services[id%num_threads_+1];
+  }
+
 
 private:
   bool accept()
@@ -98,7 +97,7 @@ private:
   Server& server_;
   boost::asio::ip::tcp::acceptor* acceptor_;
   std::vector<Session*> sessions_;
-  std::vector<boost::asio::io_service*> io_services_;
+  std::vector<boost::asio::io_service> io_services_;
   std::queue<int> available_sessions;
 
 };

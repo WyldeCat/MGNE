@@ -26,6 +26,8 @@ public:
   Session(int id, SessionManager& session_manager) 
     : BasicSession(id) 
     , session_manager_(session_manager)
+    , socket_(session_manager_.get_io_service_i(id), 
+        /* packet_queue_ */, this)
   { 
   }
   ~Session() { }
@@ -37,10 +39,7 @@ public:
     PacketAnalyzer::Decrypt(packet);
   }
 
-  void Receive()
-  {
-    socket_.Receive();
-  }
+  void Receive() { socket_.Receive(); }
 
 private:
   SessionManager& session_manager_;
