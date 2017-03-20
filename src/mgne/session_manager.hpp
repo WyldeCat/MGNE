@@ -26,8 +26,8 @@ public:
     , io_services_(num_threads)
   {
     for (int i = 0; i < capacity_; i++) {
-      sessions_.push_back(new Session(i, this)); 
-      available_sessions.push(i);
+      sessions_.push_back(nullptr); 
+      available_sessions_.push(i);
     }
   }
 
@@ -46,6 +46,12 @@ public:
       // TODO Apply thread manager
       // create_thread(io_services[i].run);
     }
+  }
+
+  void CloseSession(int id)
+  {
+    delete sessions_[id];  
+    available_sessions_.push(id);
   }
 
   const Server& GetServer()
@@ -71,6 +77,7 @@ private:
     // TODO : thread safe queue
     int session_id = available_sessions.front();
     available_sessions.pop();
+    sessions_[session_id] = new Session(i, this);
     //
     acceptor_.async_accept(sessions_[session_id].GetSocket().get_socket(),
       boost::bind(&SessionManager::handle_accept, this, sessions_[session_id],
@@ -98,7 +105,7 @@ private:
   boost::asio::ip::tcp::acceptor* acceptor_;
   std::vector<Session*> sessions_;
   std::vector<boost::asio::io_service> io_services_;
-  std::queue<int> available_sessions;
+  std::queue<int> available_sessions_;
 
 };
 }

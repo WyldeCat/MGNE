@@ -6,6 +6,7 @@
 #define _SERVER_HPP_
 
 #include <boost/asio.hpp>
+
 #include <mgne/session_manager.hpp>
 #include <mgne/packet_queue.hpp>
 

@@ -15,6 +15,7 @@
 
 #include <mgne/session.hpp>
 #include <mgne/packet_queue.hpp>
+#include <mgne/log/logger.hpp>
 
 namespace mgne::tcp {
 class Socket {
@@ -90,8 +91,10 @@ private:
       if (error == boost::asio::error::eof) {
         // Close session
         // Add handler
+        mgne::log::Logger::Log("session closed");
       } else {
         // Log
+        mgne::log::Logger::Log("error : session closed by error");
       }
       session_.Close();
     } else {
@@ -107,6 +110,7 @@ private:
 
         if (header->size <= packet_len) {
           /* TODO: Make packet and push into PacketQueue */ 
+
           packet_len -= header->size;
           readed_len += header->size;
         } else {

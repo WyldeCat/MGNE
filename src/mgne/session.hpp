@@ -38,7 +38,7 @@ public:
     socket_.Send(immediately, packet.packet_size, packet.data_); 
     PacketAnalyzer::Decrypt(packet);
   }
-
+  void Close() { session_manager_.CloseSession(id); }
   void Receive() { socket_.Receive(); }
 
 private:
