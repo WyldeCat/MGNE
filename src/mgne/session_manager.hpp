@@ -9,21 +9,24 @@
 #include <deque>
 #include <unordered_map>
 
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+
 #include <mgne/server.hpp>
 #include <mgne/session.hpp>
 #include <mgne/thread_manager.hpp>
-
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
+#include <mgne/packet_queue.hpp>
 
 namespace mgne::tcp {
 class SessionManager {
 public:
-  SessionManager(size_t capacity, size_t num_threads, Server& server)
-    : server_(server)
-    , capacity_(capacity) 
+  SessionManager(size_t capacity, size_t num_threads,
+    boost::asio::ip::tcp::endpoint& endpoint, PacketQueue& packet_queue)
+    : capacity_(capacity) 
     , num_threads_(num_threads)
     , io_services_(num_threads)
+    , packet_queue_(packet_queue)
   {
     for (int i = 0; i < capacity_; i++) {
       sessions_.push_back(nullptr); 
@@ -37,34 +40,21 @@ public:
     if (acceptor_ != NULL) delete acceptor_;
   }
 
-  void StartAccepting()
+  void StartAccepting(boost::thread::thread_group& thread_group)
   {
-    acceptor_ = new boost::asio::ip::tcp::acceptor(io_services.front(),
-      server_.GetEndPoint());
+    acceptor_ = new boost::asio::ip::tcp::acceptor(io_services.front(), 
+      endpoint_);
     ::accept();
     for (int i = 0; i < num_threads_; i++) {
-      // TODO Apply thread manager
-      // create_thread(io_services[i].run);
+      thread_group.create_thread([]{ io_services[i].run(); });
     }
   }
 
-  void CloseSession(int id)
+  void CloseSession(int session_id)
   {
-    delete sessions_[id];  
-    available_sessions_.push(id);
+    delete sessions_[session_id];  
+    available_sessions_.push(session_id);
   }
-
-  const Server& GetServer()
-  {
-    return server_; 
-  }
-
-  boost::asio::io_service& get_io_service_i(int id)
-  {
-    if (num_threads_ == 1) return io_services[0];
-    return io_services[id%num_threads_+1];
-  }
-
 
 private:
   bool accept()
@@ -77,7 +67,8 @@ private:
     // TODO : thread safe queue
     int session_id = available_sessions.front();
     available_sessions.pop();
-    sessions_[session_id] = new Session(i, this);
+    sessions_[session_id] = new Session(i, packet_queue_,
+      num_threads_ == 1 ? io_services_[0] : io_services_[id%(num_threads_-1)+1]);
     //
     acceptor_.async_accept(sessions_[session_id].GetSocket().get_socket(),
       boost::bind(&SessionManager::handle_accept, this, sessions_[session_id],
@@ -101,8 +92,9 @@ private:
   size_t num_threads_;
   bool is_accepting;
 
-  Server& server_;
   boost::asio::ip::tcp::acceptor* acceptor_;
+  boost::asio::ip::tcp::endpoint& endpoint_;
+  PacketQueue& packet_queue_;
   std::vector<Session*> sessions_;
   std::vector<boost::asio::io_service> io_services_;
   std::queue<int> available_sessions_;

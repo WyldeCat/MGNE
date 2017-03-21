@@ -1,4 +1,4 @@
-//
+//:wq
 // thread_job_queue.hpp
 //
 /*
@@ -22,6 +22,7 @@ public:
     wqueue_size_++;
     wqueue_mutex_.unlock();
   }
+
   bool Pop(T& t)
   {
     std::lock_guard<std::mutex> lock(rqueue_mutex_);
@@ -62,6 +63,8 @@ protected:
       write_queue_ = &queues_[0];
       read_queue_ = &queues_[1];
     }
+    rqueue_size_ = wqueue_size_;
+    wqueue_size_ = 0;
   }
 
 

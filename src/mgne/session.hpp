@@ -23,11 +23,10 @@ protected:
 namespace mgne::tcp {
 class Session : public BasicSession {
 public:
-  Session(int id, SessionManager& session_manager) 
+  Session(int id, PacketQueue& packet_queue,
+    boost::asio::io_service& io_service)
     : BasicSession(id) 
-    , session_manager_(session_manager)
-    , socket_(session_manager_.get_io_service_i(id), 
-        /* packet_queue_ */, this)
+    , socket_(io_service, packet_queue)
   { 
   }
   ~Session() { }
@@ -38,7 +37,7 @@ public:
     socket_.Send(immediately, packet.packet_size, packet.data_); 
     PacketAnalyzer::Decrypt(packet);
   }
-  void Close() { session_manager_.CloseSession(id); }
+  void Close() { /* TODO */ }
   void Receive() { socket_.Receive(); }
 
 private:

@@ -20,21 +20,9 @@
 namespace mgne::tcp {
 class Socket {
 public:
-  Socket(boost::asio::io_service& io_service, PacketQueue& packet_queue,
-    Session& session)
+  Socket(boost::asio::io_service& io_service, PacketQueue& packet_queue)
     : socket_(io_service)
     , packet_queue_(packet_queue)
-    , session_(session)
-  {
-    packet_buffer_mark_ = 0;
-  }
-
-  Socket(boost::asio::io_service& io_service,
-    const boost::asio::ip::tcp::endpoint endpoint_, PacketQueue& packet_queue_,
-    Session& session)
-    : socket_(io_service, endpoint_)
-    , packet_queue_(packet_queue)
-    , session_(session)
   {
     packet_buffer_mark_ = 0;
   }
@@ -94,6 +82,7 @@ private:
         mgne::log::Logger::Log("session closed");
       } else {
         // Log
+        // TODO
         mgne::log::Logger::Log("error : session closed by error");
       }
       session_.Close();
