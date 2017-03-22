@@ -13,9 +13,7 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 
-#include <mgne/server.hpp>
 #include <mgne/session.hpp>
-#include <mgne/thread_manager.hpp>
 #include <mgne/packet_queue.hpp>
 
 namespace mgne::tcp {
@@ -24,6 +22,7 @@ public:
   SessionManager(size_t capacity, size_t num_threads,
     boost::asio::ip::tcp::endpoint& endpoint, PacketQueue& packet_queue)
     : capacity_(capacity) 
+    , endpoint_(endpoint)
     , num_threads_(num_threads)
     , io_services_(num_threads)
     , packet_queue_(packet_queue)
@@ -40,16 +39,16 @@ public:
     if (acceptor_ != NULL) delete acceptor_;
   }
 
-  void StartAccepting(boost::thread::thread_group& thread_group)
+  void StartAccepting(boost::thread_group& thread_group)
   {
-    acceptor_ = new boost::asio::ip::tcp::acceptor(io_services.front(), 
+    acceptor_ = new boost::asio::ip::tcp::acceptor(io_services_.front(), 
       endpoint_);
-    ::accept();
+    SessionManager::accept();
     for (int i = 0; i < num_threads_; i++) {
-      thread_group.create_thread([]{ io_services[i].run(); });
+      thread_group.create_thread(boost::bind(&boost::asio::io_service::run,
+        &io_services_[i]));
     }
-  }
-
+  } 
   void CloseSession(int session_id)
   {
     delete sessions_[session_id];  
@@ -59,21 +58,23 @@ public:
 private:
   bool accept()
   {
-    if (available_sessions.empty()) {
+    if (available_sessions_.empty()) {
       is_accepting = false;
       return false;
     }
     is_accepting = true;
     // TODO : thread safe queue
-    int session_id = available_sessions.front();
-    available_sessions.pop();
-    sessions_[session_id] = new Session(i, packet_queue_,
-      num_threads_ == 1 ? io_services_[0] : io_services_[id%(num_threads_-1)+1]);
+    int session_id = available_sessions_.front();
+    available_sessions_.pop();
+    sessions_[session_id] = new Session(session_id, packet_queue_,
+      num_threads_ == 1 ? 
+      io_services_[0] : io_services_[session_id % (num_threads_ - 1) + 1]);
     //
-    acceptor_.async_accept(sessions_[session_id].GetSocket().get_socket(),
+    /*
+    acceptor_->async_accept(sessions_[session_id].GetSocket().get_socket(),
       boost::bind(&SessionManager::handle_accept, this, sessions_[session_id],
       boost::asio::placeholders);
-
+    */
     return true;
   }
 
@@ -82,7 +83,7 @@ private:
     if (!error) {
       // TODO Call Event Listener
       session->Receive();
-      ::accept();
+      SessionManager::accept();
     } else {
       // TODO Log and Assert
     }
@@ -94,10 +95,10 @@ private:
 
   boost::asio::ip::tcp::acceptor* acceptor_;
   boost::asio::ip::tcp::endpoint& endpoint_;
-  PacketQueue& packet_queue_;
   std::vector<Session*> sessions_;
   std::vector<boost::asio::io_service> io_services_;
   std::queue<int> available_sessions_;
+  PacketQueue& packet_queue_;
 
 };
 }
@@ -105,25 +106,7 @@ private:
 namespace mgne::udp {
 class SessionManager {
 public:
-  SessionManager(size_t capacity, Server& server)
-    : server_(server)
-  {
-  }
-
-  ~SessionManager() { }
-
-  void StartAccepting(size_t num_threads, ThreadManager& thread_manager)
-  {
-  }
-
-  void GetServer()
-  {
-  }
-
 private:
-  size_t capacity_;
-  Server& server_;
-  std::unordered_map<int, Session> sessions_;
 };
 }
 

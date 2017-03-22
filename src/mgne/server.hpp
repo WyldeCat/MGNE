@@ -11,6 +11,7 @@ thread pool이 필요하다.
 #define _SERVER_HPP_
 
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #include <mgne/session_manager.hpp>
 #include <mgne/packet_queue.hpp>
@@ -22,7 +23,7 @@ public:
     size_t num_pq_threads) 
     : endpoint_(endpoint)
     , capacity_(capacity)
-    , packet_queue_(num_pq_threads, *this)
+    , packet_queue_(num_pq_threads)
   {
   }
 
@@ -30,17 +31,12 @@ public:
   {
   }
 
-  const boost::asio::ip::tcp::endpoint& GetEndpoint()
-  {
-    return endpoint_;
-  }
-  
   virtual void Run() = 0;
   virtual void Stop() = 0;
 
-private:
+protected:
   boost::asio::ip::tcp::endpoint endpoint_;
-  boost::thread::thread_group thread_group_;
+  boost::thread_group thread_group_;
   PacketQueue packet_queue_;
   size_t capacity_;
 
@@ -63,13 +59,13 @@ public:
   
   void Run() 
   {
-    StartAccepting(thread_group_); 
+    session_manager_.StartAccepting(thread_group_); 
+    packet_queue_.StartProcessing(thread_group_);
   }
   
   void Stop()
   {
     // DO I really need to implement this?
-
   }
 
 private:
@@ -80,17 +76,6 @@ private:
 namespace mgne::udp {
 class Server : public BasicServer {
 public:
-  Server(boost::asio::ip::tcp::endpoint endpoint,
-    size_t capacity, size_t num_io_threads, size_t num_pq_threads)
-    : BasicServer(endpoint, capacity, num_pq_threads)
-    , session_manager_(capacity_, num_io_threads, *this)
-  {
-  }
-
-  ~Server()
-  {
-  }
-
   void Run()
   {
   }
@@ -100,7 +85,6 @@ public:
   }
 
 private:
-  SessionManager session_manager_;
 };
 }
 

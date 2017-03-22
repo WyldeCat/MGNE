@@ -13,7 +13,6 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 
-#include <mgne/session.hpp>
 #include <mgne/packet_queue.hpp>
 #include <mgne/log/logger.hpp>
 
@@ -42,7 +41,7 @@ public:
     if (immediately == false && send_data_queue_.size() > 1) return;
     // Check async_write vs async_write_some
     boost::asio::async_write(socket_, boost::asio::buffer(data, packet_size),
-      boost::bind(&Session::handle_write, this,
+      boost::bind(&Socket::handle_write, this,
       boost::asio::placeholders::error,
       boost::asio::placeholders::bytes_transferred));
   }
@@ -51,7 +50,8 @@ public:
   { 
     memset(&receive_buffer_, 0, sizeof(receive_buffer_));
     // Check async_read_some vs async_read_some
-    socket_.async_read_some(boost::asio::buffer(&Socket::handle_read, this,
+    socket_.async_read_some(boost::asio::buffer(receive_buffer_),
+      boost::bind(&Socket::handle_read, this,
       boost::asio::placeholders::error, 
       boost::asio::placeholders::bytes_transferred));
   }
@@ -67,8 +67,8 @@ private:
 
     if (send_data_queue_.empty() == false) {
       char* data = send_data_queue_.front();
-      TCP_PACKET_HEADER* header = (TCP_PACKET_HEADER*)data;
-      Send(true, header->size, data);
+      //TCP_PACKET_HEADER* header = (TCP_PACKET_HEADER*)data;
+      //Send(true, header->size, data);
     }
   }
 
@@ -85,7 +85,6 @@ private:
         // TODO
         mgne::log::Logger::Log("error : session closed by error");
       }
-      session_.Close();
     } else {
       memcpy(&packet_buffer_[packet_buffer_mark_], receive_buffer_.data(),
         bytes_transferred);
@@ -93,18 +92,19 @@ private:
       int readed_len = 0;
 
       while (packet_len > 0) {
+        /*
         if (packet_len < sizeof(TCP_PACKET_HEADER)) break;
         TCP_PACKET_HEADER* header =
           (TCP_PACKET_HEADER*)&packet_buffer_[readed_len];
 
         if (header->size <= packet_len) {
-          /* TODO: Make packet and push into PacketQueue */ 
-
+          /* TODO: Make packet and push into PacketQueue * 
           packet_len -= header->size;
           readed_len += header->size;
         } else {
           break;
         }
+        */
       }
 
       if (packet_len > 0) {
@@ -118,12 +118,18 @@ private:
   }
 
   boost::asio::ip::tcp::socket socket_;
-  Session& session_;
   PacketQueue& packet_queue_;
   std::array<char, 256> receive_buffer_;
   std::deque<char*> send_data_queue_;
   int packet_buffer_mark_;
   char packet_buffer_[256*2];
+};
+}
+
+namespace mgne::udp {
+class Socket {
+public:
+private:
 };
 }
 

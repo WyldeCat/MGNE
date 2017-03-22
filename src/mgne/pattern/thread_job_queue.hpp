@@ -12,7 +12,7 @@ Is std::mutex fair?
 #include <mutex>
 
 namespace mgne::pattern {
-template <typename T>
+template <class T>
 class ThreadJobQueue {
 public:
   void Push(const T& t)
