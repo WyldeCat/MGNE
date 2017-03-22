@@ -48,8 +48,6 @@ protected:
 
   ~ThreadJobQueue()
   {
-    write_queue_->clear();
-    read_queue_->clear();
   }
 
   void swap()

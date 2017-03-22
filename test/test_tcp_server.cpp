@@ -4,7 +4,7 @@
 
 int main()
 {
-  mgne::tcp::Server server;
-
+  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), 4000);
+  mgne::tcp::Server server(endpoint, 1000, 3, 3);
   return 0;
 }
