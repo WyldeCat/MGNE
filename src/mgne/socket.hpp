@@ -14,14 +14,17 @@
 #include <boost/bind.hpp>
 
 #include <mgne/packet_queue.hpp>
+#include <mgne/pattern/thread_safe_queue.hpp>
 #include <mgne/log/logger.hpp>
 
 namespace mgne::tcp {
 class Socket {
 public:
-  Socket(boost::asio::io_service& io_service, PacketQueue& packet_queue)
+  Socket(boost::asio::io_service& io_service, PacketQueue& packet_queue,
+    pattern::ThreadSafeQueue<int>& thread_safe_queue)
     : socket_(io_service)
     , packet_queue_(packet_queue)
+    , thread_safe_queue_(thread_safe_queue)
   {
     packet_buffer_mark_ = 0;
   }
@@ -119,6 +122,7 @@ private:
 
   boost::asio::ip::tcp::socket socket_;
   PacketQueue& packet_queue_;
+  pattern::ThreadSafeQueue<int>& thread_safe_queue_;
   std::array<char, 256> receive_buffer_;
   std::deque<char*> send_data_queue_;
   int packet_buffer_mark_;

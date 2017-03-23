@@ -15,6 +15,7 @@
 
 #include <mgne/session.hpp>
 #include <mgne/packet_queue.hpp>
+#include <mgne/pattern/thread_safe_queue.hpp>
 
 namespace mgne::tcp {
 class SessionManager {
@@ -29,7 +30,7 @@ public:
   {
     for (int i = 0; i < capacity_; i++) {
       sessions_.push_back(nullptr); 
-      available_sessions_.push(i);
+      available_sessions_.Push(i);
     }
   }
 
@@ -49,26 +50,23 @@ public:
         &io_services_[i]));
     }
   } 
-  void CloseSession(int session_id)
-  {
-    delete sessions_[session_id];  
-    available_sessions_.push(session_id);
-  }
 
 private:
   bool accept()
   {
-    if (available_sessions_.empty()) {
+    if (available_sessions_.Empty()) {
       is_accepting = false;
       return false;
     }
     is_accepting = true;
     // TODO : thread safe queue
     int session_id = available_sessions_.front();
-    available_sessions_.pop();
+    available_sessions_.Pop();
+    if (sessions_[session_id] != nullptr) delete sessions_[session_id];
     sessions_[session_id] = new Session(session_id, packet_queue_,
       num_threads_ == 1 ? 
-      io_services_[0] : io_services_[session_id % (num_threads_ - 1) + 1]);
+      io_services_[0] : io_services_[session_id % (num_threads_ - 1) + 1],
+      available_sessions_);
     //
     /*
     acceptor_->async_accept(sessions_[session_id].GetSocket().get_socket(),
@@ -97,7 +95,7 @@ private:
   boost::asio::ip::tcp::endpoint& endpoint_;
   std::vector<Session*> sessions_;
   std::vector<boost::asio::io_service> io_services_;
-  std::queue<int> available_sessions_;
+  pattern::ThreadSafeQueue<int> available_sessions_;
   PacketQueue& packet_queue_;
 
 };

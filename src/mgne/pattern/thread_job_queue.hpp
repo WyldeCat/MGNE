@@ -1,4 +1,4 @@
-//:wq
+//
 // thread_job_queue.hpp
 //
 /*
@@ -12,7 +12,7 @@ Is std::mutex fair?
 #include <mutex>
 
 namespace mgne::pattern {
-template <class T>
+template <typename T>
 class ThreadJobQueue {
 public:
   void Push(const T& t)
