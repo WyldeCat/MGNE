@@ -32,6 +32,9 @@ public:
       sessions_.push_back(nullptr); 
       available_sessions_.Push(i);
     }
+    for (auto& io_service : io_services_) {
+      works_.push_back(boost::asio::io_service::work(io_service)); 
+    }
   }
 
   ~SessionManager() 
@@ -68,16 +71,15 @@ private:
       io_services_[0] : io_services_[session_id % (num_threads_ - 1) + 1],
       available_sessions_);
     //
-    /*
-    acceptor_->async_accept(sessions_[session_id].GetSocket().get_socket(),
+    acceptor_->async_accept(sessions_[session_id]->GetSocket().get_socket(),
       boost::bind(&SessionManager::handle_accept, this, sessions_[session_id],
-      boost::asio::placeholders);
-    */
+      boost::asio::placeholders::error));
     return true;
   }
 
   void handle_accept(Session* session, const boost::system::error_code& error)
   {
+    /* For test */ std::cout << "thread working!!!" << std::endl;
     if (!error) {
       // TODO Call Event Listener
       session->Receive();
@@ -95,6 +97,7 @@ private:
   boost::asio::ip::tcp::endpoint& endpoint_;
   std::vector<Session*> sessions_;
   std::vector<boost::asio::io_service> io_services_;
+  std::vector<boost::asio::io_service::work> works_;
   pattern::ThreadSafeQueue<int> available_sessions_;
   PacketQueue& packet_queue_;
 

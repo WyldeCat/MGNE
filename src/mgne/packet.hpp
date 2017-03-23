@@ -40,6 +40,7 @@ public:
 private:
   char* data_;
   int session_id_;
+  int packet_id_;
   int packet_size_;
   PacketType packet_type_;
 

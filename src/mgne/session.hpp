@@ -30,9 +30,9 @@ class Session : public BasicSession {
 public:
   Session(int id, PacketQueue& packet_queue,
     boost::asio::io_service& io_service,
-    pattern::ThreadSafeQueue<int>& thread_safe_queue)
+    pattern::ThreadSafeQueue<int>& available_sessions)
     : BasicSession(id) 
-    , socket_(io_service, packet_queue, thread_safe_queue)
+    , socket_(io_service, packet_queue, available_sessions, id_)
   { 
   }
   ~Session() { }
@@ -43,8 +43,10 @@ public:
     socket_.Send(immediately, packet.packet_size_, packet.data_); 
     PacketAnalyzer::Decrypt(packet);
   }
-  void Close() { /* TODO */ }
+
+  void Close() { socket_.Close(); }
   void Receive() { socket_.Receive(); }
+  Socket& GetSocket() { return socket_; }
 
 private:
   Socket socket_;

@@ -61,6 +61,10 @@ public:
   {
     session_manager_.StartAccepting(thread_group_); 
     packet_queue_.StartProcessing(thread_group_);
+    while (1) {
+      /* For test */ std::cout << "Running...\n" << std::endl;
+      /* For test */ boost::this_thread::sleep(boost::posix_time::seconds(2));
+    }
   }
   
   void Stop()
