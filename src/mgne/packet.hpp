@@ -6,6 +6,9 @@
 #define _PACKET_HPP_
 
 #include <string.h>
+#include <iostream>
+#include <vector>
+#include <memory>
 
 namespace mgne::tcp {
 class Session;
@@ -24,21 +27,21 @@ public:
     PACKET_TCP
   } PacketType;
 
+  Packet() { }
   Packet(char* data, int packet_size, int session_id, PacketType packet_type)
-    : data_(new char[packet_size])
+    : data_(std::make_shared<std::vector<char>>(packet_size))
     , session_id_(session_id)
     , packet_type_(packet_type)
   {
-    strncpy(data_, data, packet_size);   
+    strncpy(data_->data(), data, packet_size);
   }
 
   ~Packet()
   {
-    delete[] data_;
   }
 
 private:
-  char* data_;
+  std::shared_ptr<std::vector<char>> data_;
   int session_id_;
   int packet_id_;
   int packet_size_;

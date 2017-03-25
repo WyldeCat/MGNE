@@ -40,7 +40,7 @@ public:
   void Send(const bool immediately, Packet& packet)
   {
     PacketAnalyzer::Encrypt(packet);
-    socket_.Send(immediately, packet.packet_size_, packet.data_); 
+    socket_.Send(immediately, packet.packet_size_, packet.data_->data()); 
     PacketAnalyzer::Decrypt(packet);
   }
 

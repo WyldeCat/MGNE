@@ -11,3 +11,4 @@
 #include <mgne/session_manager.hpp>
 #include <mgne/server.hpp>
 
+#include <mgne/protocol.hpp>

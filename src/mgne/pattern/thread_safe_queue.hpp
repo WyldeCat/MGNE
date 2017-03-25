@@ -28,6 +28,7 @@ public:
     mutex_.unlock();
   }
 
+
   bool Empty()
   {
     // FIXME

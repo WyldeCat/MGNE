@@ -14,16 +14,17 @@ thread pool이 필요하다.
 #include <boost/thread.hpp>
 
 #include <mgne/session_manager.hpp>
+#include <mgne/packet.hpp>
 #include <mgne/packet_queue.hpp>
 
 namespace mgne {
 class BasicServer {
 public:
   BasicServer(boost::asio::ip::tcp::endpoint endpoint, size_t capacity,
-    size_t num_pq_threads) 
+    size_t num_pq_threads, void (*packet_handler)(Packet&)) 
     : endpoint_(endpoint)
     , capacity_(capacity)
-    , packet_queue_(num_pq_threads)
+    , packet_queue_(num_pq_threads, packet_handler)
   {
   }
 
@@ -40,6 +41,8 @@ protected:
   PacketQueue packet_queue_;
   size_t capacity_;
 
+  // Handler
+
 };
 }
 
@@ -47,8 +50,9 @@ namespace mgne::tcp {
 class Server : public BasicServer {
 public:
   Server(boost::asio::ip::tcp::endpoint endpoint,
-    size_t capacity, size_t num_io_threads, size_t num_pq_threads)
-    : BasicServer(endpoint, capacity, num_pq_threads)
+    size_t capacity, size_t num_io_threads, size_t num_pq_threads,
+    void (*packet_handler)(Packet&))
+    : BasicServer(endpoint, capacity, num_pq_threads, packet_handler)
     , session_manager_(capacity_, num_io_threads, endpoint_, packet_queue_)
   {
   }
@@ -61,10 +65,7 @@ public:
   {
     session_manager_.StartAccepting(thread_group_); 
     packet_queue_.StartProcessing(thread_group_);
-    while (1) {
-      /* For test */ std::cout << "Running...\n" << std::endl;
-      /* For test */ boost::this_thread::sleep(boost::posix_time::seconds(2));
-    }
+    thread_group_.join_all();
   }
   
   void Stop()

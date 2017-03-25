@@ -19,14 +19,14 @@ public:
   static void Encrypt(Packet& packet)
   {
     for (int i = 0; i < packet.packet_size_; i++) {
-      packet.data_[i] ^= KEY_XOR_CIPHER;
+      packet.data_->data()[i] ^= KEY_XOR_CIPHER;
     }
   }
 
   static void Decrypt(Packet& packet)
   {
     for (int i = 0; i < packet.packet_size_; i++) {
-      packet.data_[i] ^= KEY_XOR_CIPHER;
+      packet.data_->data()[i] ^= KEY_XOR_CIPHER;
     }
   }
 };

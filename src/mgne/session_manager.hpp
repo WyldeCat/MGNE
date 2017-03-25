@@ -79,7 +79,6 @@ private:
 
   void handle_accept(Session* session, const boost::system::error_code& error)
   {
-    /* For test */ std::cout << "thread working!!!" << std::endl;
     if (!error) {
       // TODO Call Event Listener
       session->Receive();
