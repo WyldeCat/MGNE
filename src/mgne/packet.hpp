@@ -6,7 +6,6 @@
 #define _PACKET_HPP_
 
 #include <string.h>
-#include <iostream>
 #include <vector>
 #include <memory>
 
