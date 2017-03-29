@@ -106,9 +106,9 @@ private:
           (TCP_PACKET_HEADER*)&packet_buffer_[readed_len];
 
         if (header->packet_size <= packet_len) {
-          std::cout << "I'm here" << std::endl;
           packet_queue_.Push(Packet(packet_buffer_ + readed_len,
-            header->packet_size, session_id_, Packet::PACKET_TCP));
+            header->packet_size, header->packet_id, session_id_,
+            Packet::PACKET_TCP));
           packet_len -= header->packet_size;
           readed_len += header->packet_size;
         } else {

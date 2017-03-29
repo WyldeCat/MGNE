@@ -27,23 +27,52 @@ public:
   } PacketType;
 
   Packet() { }
-  Packet(char* data, int packet_size, int session_id, PacketType packet_type)
-    : data_(std::make_shared<std::vector<char>>(packet_size))
+  Packet(char* data, short packet_size, short packet_id, int session_id,
+    PacketType packet_type)
+    : data_(std::make_shared<std::vector<char>>(packet_size_))
+    , packet_id_(packet_id)
+    , packet_size_(packet_size)
     , session_id_(session_id)
     , packet_type_(packet_type)
   {
-    strncpy(data_->data(), data, packet_size);
+    strncpy(data_->data(), data, packet_size_);
   }
 
   ~Packet()
   {
   }
 
+  std::shared_ptr<std::vector<char>> GetData()
+  {
+    return data_;
+  }
+
+  int GetSessionId()
+  {
+    return session_id_;
+  }
+
+  short GetPacketSize()
+  {
+    return packet_size_;
+  }
+
+  short GetPacketId()
+  {
+    return packet_id_;
+  }
+
+  PacketType GetType()
+  {
+    return packet_type_;
+  }
+
+
 private:
   std::shared_ptr<std::vector<char>> data_;
   int session_id_;
-  int packet_id_;
-  int packet_size_;
+  short packet_size_;
+  short packet_id_;
   PacketType packet_type_;
 
   friend class PacketAnalyzer;
@@ -53,3 +82,4 @@ private:
 }
 
 #endif
+
