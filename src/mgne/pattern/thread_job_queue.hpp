@@ -8,6 +8,8 @@ Is std::mutex fair?
 #ifndef _THREAD_JOB_QUEUE_
 #define _THREAD_JOB_QUEUE_
 
+#include <iostream>
+
 #include <queue>
 #include <mutex>
 

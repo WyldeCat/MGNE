@@ -105,9 +105,11 @@ private:
         TCP_PACKET_HEADER* header =
           (TCP_PACKET_HEADER*)&packet_buffer_[readed_len];
 
-        if (header->packet_size <= packet_len) {
-          packet_queue_.Push(Packet(packet_buffer_ + readed_len,
-            header->packet_size, header->packet_id, session_id_,
+        if (packet_len >= header->packet_size) {
+          packet_queue_.Push(Packet(packet_buffer_ + readed_len +
+            sizeof(TCP_PACKET_HEADER), 
+            header->packet_size - sizeof(TCP_PACKET_HEADER),
+            header->packet_id, session_id_,
             Packet::PACKET_TCP));
           packet_len -= header->packet_size;
           readed_len += header->packet_size;

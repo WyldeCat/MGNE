@@ -29,20 +29,20 @@ public:
   Packet() { }
   Packet(char* data, short packet_size, short packet_id, int session_id,
     PacketType packet_type)
-    : data_(std::make_shared<std::vector<char>>(packet_size_))
+    : data_(std::make_shared<std::vector<char>>(packet_size))
     , packet_id_(packet_id)
     , packet_size_(packet_size)
     , session_id_(session_id)
     , packet_type_(packet_type)
   {
-    strncpy(data_->data(), data, packet_size_);
+    memcpy(data_->data(), data, packet_size_);
   }
 
   ~Packet()
   {
   }
 
-  std::shared_ptr<std::vector<char>> GetData()
+  std::shared_ptr<std::vector<char>> GetPacketData()
   {
     return data_;
   }
