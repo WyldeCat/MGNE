@@ -33,7 +33,8 @@ public:
 
   ~Socket() { socket_.close(); }
 
-  void Send(const bool immediately, size_t packet_size, char* packet_data)
+  void Send(const bool immediately, const short packet_size,
+    const short packet_id, char* packet_data)
   {
     char* data = nullptr;
     if (immediately == false) {
@@ -78,7 +79,7 @@ private:
     if (send_data_queue_.empty() == false) {
       char* data = send_data_queue_.front();
       TCP_PACKET_HEADER* header = (TCP_PACKET_HEADER*)data;
-      Send(true, header->packet_size, data);
+      Send(true, header->packet_size, header->packet_id, data);
     }
   }
 

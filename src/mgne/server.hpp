@@ -73,6 +73,8 @@ public:
     // DO I really need to implement this?
   }
 
+  const SessionManager& GetSessionManager() { return session_manager_; }
+
 private:
   SessionManager session_manager_;
 };

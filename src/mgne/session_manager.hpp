@@ -54,6 +54,10 @@ public:
     }
   } 
 
+  void Send(const int session_id, Packet &packet) const {
+    sessions_[session_id]->Send(false, packet);
+  }
+
 private:
   bool accept()
   {
