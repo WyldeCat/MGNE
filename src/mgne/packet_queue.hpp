@@ -10,6 +10,8 @@
 #include <mgne/packet.hpp>
 #include <mgne/pattern/thread_job_queue.hpp>
 
+#include <pthread.h>
+
 namespace mgne {
 class PacketQueue : public pattern::ThreadJobQueue<mgne::Packet> {
 public:
