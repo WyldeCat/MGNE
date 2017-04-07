@@ -104,7 +104,7 @@ private:
       int readed_len = 0;
 
       while (packet_len > 0) {
-        if (packet_len < sizeof(TCP_PACKET_HEADER)) break;
+        if (packet_len <= sizeof(TCP_PACKET_HEADER)) break;
         TCP_PACKET_HEADER* header =
           (TCP_PACKET_HEADER*)&packet_buffer_[readed_len];
 
