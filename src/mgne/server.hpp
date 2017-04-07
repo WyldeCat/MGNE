@@ -20,10 +20,9 @@ thread pool이 필요하다.
 namespace mgne {
 class BasicServer {
 public:
-  BasicServer(boost::asio::ip::tcp::endpoint endpoint, size_t capacity,
-    size_t num_pq_threads, void (*packet_handler)(Packet&)) 
-    : endpoint_(endpoint)
-    , capacity_(capacity)
+  BasicServer(size_t capacity, size_t num_pq_threads,
+    void (*packet_handler)(Packet&))
+    : capacity_(capacity)
     , packet_queue_(num_pq_threads, packet_handler)
   {
   }
@@ -36,7 +35,7 @@ public:
   virtual void Stop() = 0;
 
 protected:
-  boost::asio::ip::tcp::endpoint endpoint_;
+  // HACK
   boost::thread_group thread_group_;
   PacketQueue packet_queue_;
   size_t capacity_;
@@ -52,7 +51,8 @@ public:
   Server(boost::asio::ip::tcp::endpoint endpoint,
     size_t capacity, size_t num_io_threads, size_t num_pq_threads,
     void (*packet_handler)(Packet&))
-    : BasicServer(endpoint, capacity, num_pq_threads, packet_handler)
+    : BasicServer(capacity, num_pq_threads, packet_handler)
+    , endpoint_(endpoint)
     , session_manager_(capacity_, num_io_threads, endpoint_, packet_queue_)
   {
   }
@@ -76,6 +76,7 @@ public:
   const SessionManager& GetSessionManager() { return session_manager_; }
 
 private:
+  boost::asio::ip::tcp::endpoint endpoint_;
   SessionManager session_manager_;
 };
 }
@@ -83,8 +84,21 @@ private:
 namespace mgne::udp {
 class Server : public BasicServer {
 public:
+  Server(boost::asio::ip::udp::endpoint endpoint,
+    size_t capacity, size_t num_io_threads, size_t num_pq_threads,
+    void (*packet_handler)(Packet&), int (*admit_handler)(Packet))
+    : BasicServer(capacity, num_pq_threads, packet_handler)
+    , endpoint_(endpoint)
+    , session_manager_(capacity_, num_io_threads, endpoint_, packet_queue_,
+      admit_handler)
+  {
+  }
+
   void Run()
   {
+    session_manager_.StartAccepting(thread_group_);
+    packet_queue_.StartProcessing(thread_group_);
+    thread_group_.join_all();
   }
 
   void Stop()
@@ -92,6 +106,8 @@ public:
   }
 
 private:
+  boost::asio::ip::udp::endpoint endpoint_;
+  SessionManager session_manager_;
 };
 }
 

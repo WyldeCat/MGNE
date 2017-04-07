@@ -21,11 +21,14 @@ public:
     mutex_.unlock();
   }
 
-  void Pop() 
+  bool Pop(T& t)
   {
     mutex_.lock();
+    if (queue_.empty()) return false;
+    t = queue_.front();
     queue_.pop(); 
     mutex_.unlock();
+    return true;
   }
 
 
@@ -36,7 +39,7 @@ public:
     return queue_.empty();
   }
 
-  T front() 
+  T Front() 
   { 
     std::lock_guard<std::mutex> lock(mutex_);
     return queue_.front(); 

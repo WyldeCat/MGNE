@@ -7,8 +7,8 @@
 
 #include <string.h>
 
-#include <deque>
 #include <array>
+#include <unordered_map>
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -37,6 +37,7 @@ public:
     const short packet_id, char* packet_data)
   {
     char* data = nullptr;
+
     if (immediately == false) {
       data = new char[packet_size];
       memcpy(data, packet_data, packet_size);
@@ -60,6 +61,7 @@ public:
       boost::asio::placeholders::bytes_transferred));
   }
 
+  short GetPort() { return socket_.local_endpoint().port(); }
   void Close() { close(); }
   boost::asio::ip::tcp::socket& get_socket() { return socket_; }
 
@@ -143,7 +145,93 @@ private:
 namespace mgne::udp {
 class Socket {
 public:
+  Socket(boost::asio::io_service& io_service,
+    boost::asio::ip::udp::endpoint& endpoint,
+    PacketQueue& packet_queue) 
+    : socket_(io_service, endpoint)
+    , packet_queue_(packet_queue)
+  {
+  }
+  ~Socket() { socket_.close(); }
+
+  void Send(const bool immediately, const short packet_size,
+    const short packet_id, char* packet_data,
+    boost::asio::ip::udp::endpoint& remote_endpoint)
+  {
+    char* data = nullptr;
+    boost::asio::ip::udp::endpoint endpoint;
+    if (immediately == false) {
+      data = new char[packet_size];
+      endpoint = remote_endpoint;
+      memcpy(data, packet_data, packet_size);
+      send_endpoint_queue_.push_back(remote_endpoint);
+      send_data_queue_.push_back(data);
+    } else {
+      data = packet_data;
+      endpoint = remote_endpoint;
+    }
+    if (immediately == false && send_data_queue_.size() > 1) return;
+    boost::asio::async_write(socket_, boost::asio::buffer(data, packet_size),
+      endpoint, boost::bind(&Socket::handle_write, this,
+      boost::asio::placeholders::error,
+      boost::asio::placeholders::bytes_transferred));
+  }
+
+  void Receive()
+  {
+    memset(&recv_buffer_, 0, sizeof(recv_buffer_));
+    socket_.async_receive_from(boost::asio::buffer(recv_buffer_),
+      remote_endpoint_,
+      boost::bind(&Socket::handle_read, this,
+      boost::asio::placeholders::error,
+      boost::asio::placeholders::bytes_transferred));
+  }
+
+  short GetPort() { return socket_.local_endpoint().port(); }
+  void Close() { close(); }
+  boost::asio::ip::udp::socket& get_socket() { return socket_; }
+
 private:
+  void close()
+  {
+    socket_.close();
+  }
+
+  void handle_write(const boost::system::error_code& error,
+    size_t bytes_transferred)
+  {
+    delete[] send_data_queue_.front();
+    send_data_queue_.pop_front();
+    send_endpoint_queue_.pop_front();
+
+    if (send_data_queue_.empty() == false) {
+      char* data = send_data_queue_.front();
+      UDP_PACKET_HEADER* header = (UDP_PACKET_HEADER*)data;
+      Send(true, header->packet_size, header->packet_id, data,
+        send_endpoint_queue_.front());
+    }
+  }
+
+  void handle_read(const boost::system::error_code& error,
+    size_t bytes_transferred)
+  {
+    if (error) {
+      // ?? 
+      // close session i?
+    } else {
+      // TODO
+      // if not in attached it can ignore
+      Receive();
+    }
+  }
+
+  boost::asio::ip::udp::socket socket_;
+  std::array<char, 256> recv_buffer_;
+  std::vector<int> attached_session;
+  std::deque<char*> send_data_queue_;
+  std::deque<boost::asio::ip::udp::endpoint> send_endpoint_queue_;
+  boost::asio::ip::udp::endpoint remote_endpoint_;
+  PacketQueue& packet_queue_;
 };
 }
 

@@ -35,7 +35,11 @@ public:
     , socket_(io_service, packet_queue, available_sessions, id_)
   { 
   }
-  ~Session() { }
+
+  ~Session() 
+  {
+    // Close Socket
+  }
 
   void Send(const bool immediately, Packet& packet)
   {
@@ -55,7 +59,29 @@ private:
 namespace mgne::udp {
 class Session : public BasicSession {
 public:
+  Session(int id, boost::asio::ip::udp::endpoint& endpoint,
+    Socket* socket)
+    : BasicSession(id)
+    , endpoint_(endpoint)
+    , socket_(socket) 
+  {
+    // How about using 8 byte in id? 
+  }
+  ~Session() { }
+
+  void Send(const bool immediately, Packet& packet)
+  {
+    socket_->Send(immediately, packet.packet_size_, packet.packet_id_,
+      packet.data_->data(), endpoint_);
+  }
+
+  void Close() { socket_->Close(); }
+  void Receive() { socket_->Receive(); }
+  Socket* GetSocket() { return socket_; }
+
 private:
+  boost::asio::ip::udp::endpoint endpoint_;
+  Socket* socket_;
 };
 }
 

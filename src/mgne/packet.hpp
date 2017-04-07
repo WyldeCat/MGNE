@@ -63,26 +63,10 @@ public:
     return data_;
   }
 
-  int GetSessionId()
-  {
-    return session_id_;
-  }
-
-  short GetPacketSize()
-  {
-    return packet_size_;
-  }
-
-  short GetPacketId()
-  {
-    return packet_id_;
-  }
-
-  PacketType GetType()
-  {
-    return packet_type_;
-  }
-
+  int GetSessionId() { return session_id_; }
+  short GetPacketSize() { return packet_size_; }
+  short GetPacketId() { return packet_id_; }
+  PacketType GetType() { return packet_type_; }
 
 private:
   std::shared_ptr<std::vector<char>> data_;
