@@ -170,7 +170,7 @@ private:
     size_t bytes_transferred)
   {
     if (error) {
-      return;
+
     } else {
       int& session_id = endpoint_map_[ep2str(remote_endpoint_)];
       if (session_id != 0) {
@@ -181,7 +181,6 @@ private:
         accept();
         return;
       }
-
       available_sessions_.Pop(session_id);
 
       UDP_PACKET_HEADER* header = (UDP_PACKET_HEADER*)recv_buffer_.data();
@@ -212,6 +211,7 @@ private:
       sessions_[session_id]->GetSocket()->Send(false, header->packet_size,
         header->packet_id, (char*)header, remote_endpoint_);
     }
+    accept();
   }
 
   size_t capacity_;

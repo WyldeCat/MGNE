@@ -152,6 +152,7 @@ public:
     , packet_queue_(packet_queue)
   {
   }
+
   ~Socket() { socket_.close(); }
 
   void Send(const bool immediately, const short packet_size,
@@ -171,8 +172,8 @@ public:
       endpoint = remote_endpoint;
     }
     if (immediately == false && send_data_queue_.size() > 1) return;
-    boost::asio::async_write(socket_, boost::asio::buffer(data, packet_size),
-      endpoint, boost::bind(&Socket::handle_write, this,
+    socket_.async_send_to(boost::asio::buffer(data, packet_size), endpoint,
+      boost::bind(&Socket::handle_write, this,
       boost::asio::placeholders::error,
       boost::asio::placeholders::bytes_transferred));
   }
