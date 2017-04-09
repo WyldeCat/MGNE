@@ -111,7 +111,7 @@ class SessionManager {
 public:
   SessionManager(size_t capacity, size_t num_threads,
     boost::asio::ip::udp::endpoint& endpoint, PacketQueue& packet_queue,
-    int (*admit_handler)(Packet))
+    int (*admit_handler)(Packet&))
     : capacity_(capacity)
     , endpoint_(endpoint)
     , packet_queue_(packet_queue)
@@ -231,7 +231,7 @@ private:
   std::unordered_map<int, Socket*> socket_map_;
   pattern::ThreadSafeQueue<int> available_sessions_;
 
-  int (*admit_handler_)(Packet);
+  int (*admit_handler_)(Packet&);
 
 };
 }

@@ -86,7 +86,7 @@ class Server : public BasicServer {
 public:
   Server(boost::asio::ip::udp::endpoint endpoint,
     size_t capacity, size_t num_io_threads, size_t num_pq_threads,
-    void (*packet_handler)(Packet&), int (*admit_handler)(Packet))
+    void (*packet_handler)(Packet&), int (*admit_handler)(Packet&))
     : BasicServer(capacity, num_pq_threads, packet_handler)
     , endpoint_(endpoint)
     , session_manager_(capacity_, num_io_threads, endpoint_, packet_queue_,

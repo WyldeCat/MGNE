@@ -3,7 +3,7 @@
 #include <mgne/mgne.hpp>
 #include <boost/asio.hpp>
 
-int admit_handler(mgne::Packet p)
+int admit_handler(mgne::Packet& p)
 {
   std::cout << "receiving admit req" << std::endl;
   return 1;
