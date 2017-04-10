@@ -110,7 +110,7 @@ private:
 
         if (packet_len >= header->packet_size) {
           packet_queue_.Push(Packet(packet_buffer_ + readed_len +
-            sizeof(TCP_PACKET_HEADER), 
+            sizeof(TCP_PACKET_HEADER),
             header->packet_size - sizeof(TCP_PACKET_HEADER),
             header->packet_id, session_id_,
             Packet::PACKET_TCP));
@@ -188,8 +188,20 @@ public:
       boost::asio::placeholders::bytes_transferred));
   }
 
+  static long long ep2ll(boost::asio::ip::udp::endpoint& endpoint)
+  {
+    long long ret = endpoint.port();
+    ret += (*(short*)(endpoint.address().to_v4().to_bytes().data()) << 2);
+    return ret; 
+  }
+
+  std::unordered_map<long long,int>& GetAttachedSessions() 
+  { 
+    return attached_sessions; 
+  }
   short GetPort() { return socket_.local_endpoint().port(); }
   void Close() { close(); }
+ 
   boost::asio::ip::udp::socket& get_socket() { return socket_; }
 
 private:
@@ -217,18 +229,20 @@ private:
     size_t bytes_transferred)
   {
     if (error) {
-      // ?? 
-      // close session i?
+      // close session?
     } else {
-      // TODO
-      // if not in attached it can ignore
+      int session_id = attached_sessions[ep2ll(remote_endpoint_)];
+      UDP_PACKET_HEADER* header = (UDP_PACKET_HEADER*)recv_buffer_.data();
+      packet_queue_.Push(Packet((char*)header + sizeof(UDP_PACKET_HEADER),
+        header->packet_size - sizeof(UDP_PACKET_HEADER), header->packet_id,
+        session_id, Packet::PacketType::PACKET_UDP));
       Receive();
     }
   }
 
   boost::asio::ip::udp::socket socket_;
   std::array<char, 256> recv_buffer_;
-  std::vector<int> attached_session;
+  std::unordered_map<long long, int> attached_sessions;
   std::deque<char*> send_data_queue_;
   std::deque<boost::asio::ip::udp::endpoint> send_endpoint_queue_;
   boost::asio::ip::udp::endpoint remote_endpoint_;

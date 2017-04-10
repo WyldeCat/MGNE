@@ -147,15 +147,8 @@ public:
   void Send(const int session_id, Packet &packet) const {
     sessions_[session_id]->Send(false, packet);
   }
-
+ 
 private:
-  long long ep2str(boost::asio::ip::udp::endpoint& endpoint)
-  {
-    long long ret = endpoint.port();
-    ret += (*(short*)(endpoint.address().to_v4().to_bytes().data()) << 2);
-    return ret; 
-  }
-
   void accept()
   {
     memset(&recv_buffer_, 0, sizeof(recv_buffer_));
@@ -172,7 +165,8 @@ private:
     if (error) {
 
     } else {
-      int& session_id = endpoint_map_[ep2str(remote_endpoint_)];
+      long long ll = Socket::ep2ll(remote_endpoint_);
+      int session_id = endpoint_map_[ll];
       if (session_id != 0) {
         accept();
         return;
@@ -182,6 +176,7 @@ private:
         return;
       }
       available_sessions_.Pop(session_id);
+      endpoint_map_[ll] = session_id;
 
       UDP_PACKET_HEADER* header = (UDP_PACKET_HEADER*)recv_buffer_.data();
       if (header->packet_id != PACKET_ADMIT_REQ) return;
@@ -202,7 +197,7 @@ private:
       } else {
         socket = socket_map_[socket_id]; 
       }
-
+      socket->GetAttachedSessions().insert(std::make_pair(ll, session_id));
       if (sessions_[session_id] != nullptr) delete sessions_[session_id];
       sessions_[session_id] = new Session(session_id, remote_endpoint_, socket);
       header->packet_id = PACKET_ADMIT_ANS;
