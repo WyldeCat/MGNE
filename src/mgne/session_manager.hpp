@@ -59,6 +59,8 @@ public:
     sessions_[session_id]->Send(false, packet);
   }
 
+  std::vector<boost::asio::io_service>& GetIOServices() { return io_services_; }
+
 private:
   bool accept()
   {
@@ -147,7 +149,10 @@ public:
   void Send(const int session_id, Packet &packet) const {
     sessions_[session_id]->Send(false, packet);
   }
- 
+  
+  Socket* GetSocket(int session_id) { return socket_map_[session_id]; }
+  std::vector<boost::asio::io_service>& GetIOServices() { return io_services_; }
+
 private:
   void accept()
   {

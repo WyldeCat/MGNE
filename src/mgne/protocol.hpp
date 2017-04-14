@@ -18,6 +18,6 @@ struct UDP_PACKET_HEADER {
 };
 
 const short PACKET_ADMIT_REQ = -1;
-const short PACKET_ADMIT_ANS = -1;
+const short PACKET_ADMIT_ANS = -2;
 
 #endif

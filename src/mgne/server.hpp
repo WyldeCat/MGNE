@@ -105,6 +105,8 @@ public:
   {
   }
 
+  const SessionManager& GetSessionManager() { return session_manager_; }
+
 private:
   boost::asio::ip::udp::endpoint endpoint_;
   SessionManager session_manager_;

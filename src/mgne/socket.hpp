@@ -61,8 +61,10 @@ public:
       boost::asio::placeholders::bytes_transferred));
   }
 
-  short GetPort() { return socket_.local_endpoint().port(); }
   void Close() { close(); }
+  short GetPort() { return socket_.local_endpoint().port(); }
+  boost::asio::io_service& GetIOService() { return socket_.get_io_service(); }
+
   boost::asio::ip::tcp::socket& get_socket() { return socket_; }
 
 private:
@@ -199,8 +201,10 @@ public:
   { 
     return attached_sessions; 
   }
-  short GetPort() { return socket_.local_endpoint().port(); }
+
   void Close() { close(); }
+  short GetPort() { return socket_.local_endpoint().port(); }
+  boost::asio::io_service& GetIOService() { return socket_.get_io_service(); }
  
   boost::asio::ip::udp::socket& get_socket() { return socket_; }
 
