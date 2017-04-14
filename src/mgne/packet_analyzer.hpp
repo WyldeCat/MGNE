@@ -5,8 +5,8 @@
   Until now, XOR cipher is only supported one.
 */
 
-#ifndef _PACKET_ANALYZER_HPP_
-#define _PACKET_ANALYZER_HPP_
+#ifndef _MGNE_PACKET_ANALYZER_HPP_
+#define _MGNE_PACKET_ANALYZER_HPP_
 
 #include <mgne/packet.hpp>
 

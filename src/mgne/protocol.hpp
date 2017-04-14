@@ -2,8 +2,8 @@
 // protocol.hpp
 //
 
-#ifndef _PROTOCOL_HPP_
-#define _PROTOCOL_HPP_
+#ifndef _MGNE_PROTOCOL_HPP_
+#define _MGNE_PROTOCOL_HPP_
 
 // const 
 

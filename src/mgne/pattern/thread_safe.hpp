@@ -2,8 +2,8 @@
 // thread_safe.hpp
 //
 
-#ifndef _THREAD_SAFE_HPP_
-#define _THREAD_SAFE_HPP_
+#ifndef _MGNE_THREAD_SAFE_HPP_
+#define _MGNE_THREAD_SAFE_HPP_
 
 #include <mutex>
 

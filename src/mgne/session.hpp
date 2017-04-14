@@ -2,8 +2,8 @@
 // session.hpp
 //
 
-#ifndef _SESSION_HPP_
-#define _SESSION_HPP_
+#ifndef _MGNE_SESSION_HPP_
+#define _MGNE_SESSION_HPP_
 
 #include <mgne/packet_analyzer.hpp>
 #include <mgne/packet.hpp>

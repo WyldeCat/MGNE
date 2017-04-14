@@ -1,5 +1,5 @@
-#ifndef _LOGGER_HPP_
-#define _LOGGER_HPP_
+#ifndef _MGNE_LOGGER_HPP_
+#define _MGNE_LOGGER_HPP_
 
 #include <mutex>
 

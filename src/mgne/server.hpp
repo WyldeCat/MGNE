@@ -2,13 +2,11 @@
 // server.hpp
 //
 /*
-io에 대해선, thread pool이 필요 없지만,
-packet queue에서의 worker thread들이 동작하는데에 있어선,
-thread pool이 필요하다.
+
 */
 
-#ifndef _SERVER_HPP_
-#define _SERVER_HPP_
+#ifndef _MGNE_SERVER_HPP_
+#define _MGNE_SERVER_HPP_
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>

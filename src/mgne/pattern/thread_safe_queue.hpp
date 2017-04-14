@@ -2,8 +2,8 @@
 // thread_safe_queue.hpp
 //
 
-#ifndef _THREAD_SAFE_QUEUE_
-#define _THREAD_SAFE_QUEUE_
+#ifndef _MGNE_THREAD_SAFE_QUEUE_
+#define _MGNE_THREAD_SAFE_QUEUE_
 
 #include <mutex>
 #include <queue>

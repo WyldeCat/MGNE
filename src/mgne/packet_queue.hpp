@@ -2,8 +2,8 @@
 // packet_queue.hpp
 //
 
-#ifndef _PACKET_QUEUE_HPP_
-#define _PACKET_QUEUE_HPP_
+#ifndef _MGNE_PACKET_QUEUE_HPP_
+#define _MGNE_PACKET_QUEUE_HPP_
 
 #include <boost/thread.hpp>
 

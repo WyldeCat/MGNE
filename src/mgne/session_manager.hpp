@@ -2,8 +2,8 @@
 // session_manager.hpp
 //
 
-#ifndef _SESSION_MANAGER_HPP_
-#define _SESSION_MANAGER_HPP_
+#ifndef _MGNE_SESSION_MANAGER_HPP_
+#define _MGNE_SESSION_MANAGER_HPP_
 
 #include <vector>
 #include <unordered_map>

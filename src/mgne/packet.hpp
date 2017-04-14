@@ -2,8 +2,8 @@
 // packet.hpp
 //
 
-#ifndef _PACKET_HPP_
-#define _PACKET_HPP_
+#ifndef _MGNE_PACKET_HPP_
+#define _MGNE_PACKET_HPP_
 
 #include <string.h>
 #include <vector>

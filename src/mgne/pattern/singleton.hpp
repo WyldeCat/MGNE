@@ -2,8 +2,8 @@
 // singleton.hpp
 //
 
-#ifndef _SINGLETON_HPP_
-#define _SINGLETON_HPP_
+#ifndef _MGNE_SINGLETON_HPP_
+#define _MGNE_SINGLETON_HPP_
 
 namespace mgne::pattern {
 template <class T>

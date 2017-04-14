@@ -2,8 +2,8 @@
 // socket.hpp
 //
 
-#ifndef _SOCKET_HPP_
-#define _SOCKET_HPP_
+#ifndef _MGNE_SOCKET_HPP_
+#define _MGNE_SOCKET_HPP_
 
 #include <string.h>
 
