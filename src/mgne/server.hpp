@@ -66,6 +66,12 @@ public:
     thread_group_.join_all();
   }
   
+  void RunNonBlock()
+  {
+    session_manager_.StartAccepting(thread_group_);
+    packet_queue_.StartProcessing(thread_group_);
+  }
+  
   void Stop()
   {
     // DO I really need to implement this?
