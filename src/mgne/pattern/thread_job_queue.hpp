@@ -10,7 +10,7 @@ Is std::mutex fair?
 
 #include <iostream>
 
-#include <queue>
+#include <deque>
 #include <mutex>
 
 namespace mgne::pattern {
@@ -20,7 +20,7 @@ public:
   void Push(const T& t)
   {
     wqueue_mutex_.lock();
-    write_queue_->push(t);
+    wqueue_->push_front(t);
     wqueue_size_++;
     wqueue_mutex_.unlock();
   }
@@ -33,46 +33,58 @@ public:
     } else if (rqueue_size_ == 0) {
       swap();
     }
-    t = read_queue_->front();
-    read_queue_->pop();
+    t = rqueue_->front();
+    rqueue_->pop_back();
     rqueue_size_--;
     return true;
   }
 
-protected:
+  bool Erase(T& t)
+  {
+    rqueue_mutex_.lock();
+    wqueue_mutex_.lock();
+    wqueue_->erase(std::remove(wqueue_->begin(), wqueue_->end(), t),
+      wqueue_->end());
+    rqueue_->erase(std::remove(rqueue_->begin(), rqueue_->end(), t),
+      rqueue_->end());
+    rqueue_mutex_.lock();
+    wqueue_mutex_.lock();
+  }
+
   ThreadJobQueue()
   {
     wqueue_size_ = 0;
     rqueue_size_ = 0;
-    write_queue_ = &queues_[0]; 
-    read_queue_ = &queues_[1];
+    wqueue_ = &queues_[0]; 
+    rqueue_ = &queues_[1];
   }
 
   ~ThreadJobQueue()
   {
   }
 
+protected:
   void swap()
   { // It is certain that this thread obtains rqueue_mutex_,
     // when enter this function
     std::lock_guard<std::mutex> lock(wqueue_mutex_);
-    if (write_queue_ == &queues_[0]) {
-      write_queue_ = &queues_[1];
-      read_queue_ = &queues_[0];
+    if (wqueue_ == &queues_[0]) {
+      wqueue_ = &queues_[1];
+      rqueue_ = &queues_[0];
     } else {
-      write_queue_ = &queues_[0];
-      read_queue_ = &queues_[1];
+      wqueue_ = &queues_[0];
+      rqueue_ = &queues_[1];
     }
     rqueue_size_ = wqueue_size_;
     wqueue_size_ = 0;
   }
 
 
-  std::queue<T>* write_queue_;
-  std::queue<T>* read_queue_;
+  std::deque<T>* wqueue_;
+  std::deque<T>* rqueue_;
 
 private:
-  std::queue<T> queues_[2];
+  std::deque<T> queues_[2];
   std::mutex rqueue_mutex_;
   std::mutex wqueue_mutex_;
   size_t rqueue_size_;
