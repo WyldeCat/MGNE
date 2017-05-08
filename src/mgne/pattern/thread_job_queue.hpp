@@ -39,16 +39,28 @@ public:
     return true;
   }
 
+  int Rsize()
+  {
+    std::lock_guard<std::mutex> lock(rqueue_mutex_);
+    if (rqueue_size_ == 0 && wqueue_size_ != 0) swap();
+    return rqueue_size_;
+  }
+
   bool Erase(T& t)
   {
     rqueue_mutex_.lock();
     wqueue_mutex_.lock();
+
+    bool ret = (std::find(wqueue_->begin(), wqueue_->end(), t) != wqueue_->end())
+      || (std::find(rqueue_->begin(), rqueue_->end(), t) != rqueue_->end());
     wqueue_->erase(std::remove(wqueue_->begin(), wqueue_->end(), t),
       wqueue_->end());
     rqueue_->erase(std::remove(rqueue_->begin(), rqueue_->end(), t),
       rqueue_->end());
     rqueue_mutex_.lock();
     wqueue_mutex_.lock();
+
+    return ret;
   }
 
   ThreadJobQueue()
@@ -63,10 +75,9 @@ public:
   {
   }
 
-protected:
   void swap()
   { // It is certain that this thread obtains rqueue_mutex_,
-    // when enter this function
+    // when entering this function
     std::lock_guard<std::mutex> lock(wqueue_mutex_);
     if (wqueue_ == &queues_[0]) {
       wqueue_ = &queues_[1];
@@ -78,7 +89,6 @@ protected:
     rqueue_size_ = wqueue_size_;
     wqueue_size_ = 0;
   }
-
 
   std::deque<T>* wqueue_;
   std::deque<T>* rqueue_;
