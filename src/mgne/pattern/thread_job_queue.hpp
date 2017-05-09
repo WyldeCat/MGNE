@@ -46,7 +46,7 @@ public:
     return rqueue_size_;
   }
 
-  bool Erase(T& t)
+  bool Erase(const T& t)
   {
     rqueue_mutex_.lock();
     wqueue_mutex_.lock();

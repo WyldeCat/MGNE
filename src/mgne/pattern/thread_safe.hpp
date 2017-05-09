@@ -19,6 +19,10 @@ protected:
   {
     mutex_.unlock();
   }
+  bool TryLock()
+  {
+    return mutex_.try_lock();
+  }
 };
 }
 
