@@ -187,7 +187,7 @@ private:
       if (header->packet_id != PACKET_ADMIT_REQ) return;
       if (header->packet_size < sizeof(UDP_PACKET_HEADER) + sizeof(short)) return;
 
-      Packet p((char*)(header + sizeof(UDP_PACKET_HEADER)),
+      Packet p((char*)(header + 1),
         header->packet_size - sizeof(UDP_PACKET_HEADER), header->packet_id,
         0, Packet::PACKET_UDP);
 
