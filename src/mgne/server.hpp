@@ -61,8 +61,7 @@ public:
   
   void Run() 
   {
-    session_manager_.StartAccepting(thread_group_); 
-    packet_queue_.StartProcessing(thread_group_);
+    RunNonBlock();
     thread_group_.join_all();
   }
   
@@ -100,9 +99,14 @@ public:
 
   void Run()
   {
+    RunNonBlock();
+    thread_group_.join_all();
+  }
+
+  void RunNonBlock()
+  {
     session_manager_.StartAccepting(thread_group_);
     packet_queue_.StartProcessing(thread_group_);
-    thread_group_.join_all();
   }
 
   void Stop()

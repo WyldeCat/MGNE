@@ -30,7 +30,7 @@ public:
 
   Packet() { }
 
-  Packet(char* data, short packet_size, short packet_id, int session_id,
+  Packet(const char* data, short packet_size, short packet_id, int session_id,
     PacketType packet_type)
     : data_(std::make_shared<std::vector<char>>(packet_size))
     , packet_size_(packet_size)
@@ -41,17 +41,23 @@ public:
     memcpy(data_->data(), data, packet_size_);
   }
 
-  Packet(short packet_size, short packet_id, char* data, PacketType packet_type)
+  Packet(short packet_size, short packet_id, const char* data,
+    PacketType packet_type)
     : data_(std::make_shared<std::vector<char>>(packet_size +
       sizeof(TCP_PACKET_HEADER)))
     , packet_size_(packet_size + sizeof(TCP_PACKET_HEADER))
     , packet_id_(packet_id)
     , packet_type_(packet_type)
   {
-    // TODO deal with UDP
-    ((TCP_PACKET_HEADER*)data_->data())->packet_size = packet_size_;
-    ((TCP_PACKET_HEADER*)data_->data())->packet_id = packet_id_;
-    memcpy(data_->data() + sizeof(TCP_PACKET_HEADER), data, packet_size_);
+    if (packet_type == PacketType::PACKET_TCP) {
+      ((TCP_PACKET_HEADER*)data_->data())->packet_size = packet_size_;
+      ((TCP_PACKET_HEADER*)data_->data())->packet_id = packet_id_;
+      memcpy(data_->data() + sizeof(TCP_PACKET_HEADER), data, packet_size_);
+    } else {
+      ((UDP_PACKET_HEADER*)data_->data())->packet_size = packet_size_;
+      ((UDP_PACKET_HEADER*)data_->data())->packet_id = packet_id_;
+      memcpy(data_->data() + sizeof(UDP_PACKET_HEADER), data, packet_size_);
+    }
   }
 
   ~Packet()
