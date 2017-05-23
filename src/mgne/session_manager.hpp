@@ -189,7 +189,7 @@ private:
 
       Packet p((char*)(header + 1),
         header->packet_size - sizeof(UDP_PACKET_HEADER), header->packet_id,
-        0, Packet::PACKET_UDP);
+        session_id, Packet::PACKET_UDP);
 
       int socket_id = admit_handler_(p);
       if (socket_id == -1) return;
