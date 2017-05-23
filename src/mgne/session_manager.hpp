@@ -31,7 +31,7 @@ public:
   {
     for (int i = 0; i < capacity_; i++) {
       sessions_.push_back(nullptr); 
-      available_sessions_.Push(i+1);
+      available_sessions_.Push(i+1); // ZERO is special
     }
     for (auto& io_service : io_services_) {
       works_.push_back(boost::asio::io_service::work(io_service)); 
@@ -124,7 +124,7 @@ public:
   {
     for (int i = 0; i < capacity_; i++) {
       sessions_.push_back(nullptr);
-      available_sessions_.Push(i);
+      available_sessions_.Push(i + 1); // ZERO is special
     }
     for (auto& io_service : io_services_) {
       works_.push_back(boost::asio::io_service::work(io_service));
