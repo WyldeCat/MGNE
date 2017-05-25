@@ -182,8 +182,6 @@ private:
       }
       available_sessions_.Pop(session_id);
       endpoint_map_[ll] = session_id;
-      std::cerr << "endpoint : " << ll << std::endl;
-      std::cerr << "port     : " << remote_endpoint_.port() << std::endl;
 
       UDP_PACKET_HEADER* header = (UDP_PACKET_HEADER*)recv_buffer_.data();
       if (header->packet_id != PACKET_ADMIT_REQ) return;
