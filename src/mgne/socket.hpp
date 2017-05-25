@@ -173,7 +173,9 @@ public:
       data = packet_data;
       endpoint = remote_endpoint;
     }
+    std::cerr << "trying to send!" << std::endl;
     if (immediately == false && send_data_queue_.size() > 1) return;
+    std::cerr << "send!!!!!!!!!" << std::endl;
     socket_.async_send_to(boost::asio::buffer(data, packet_size), endpoint,
       boost::bind(&Socket::handle_write, this,
       boost::asio::placeholders::error,
@@ -217,11 +219,14 @@ private:
   void handle_write(const boost::system::error_code& error,
     size_t bytes_transferred)
   {
+    std::cerr << "handle_write()" << std::endl;
     delete[] send_data_queue_.front();
     send_data_queue_.pop_front();
     send_endpoint_queue_.pop_front();
+    std::cerr << "handle_writee()" << std::endl;
 
     if (send_data_queue_.empty() == false) {
+      std::cerr << "handle_writeee()" << std::endl;
       char* data = send_data_queue_.front();
       UDP_PACKET_HEADER* header = (UDP_PACKET_HEADER*)data;
       Send(true, header->packet_size, header->packet_id, data,

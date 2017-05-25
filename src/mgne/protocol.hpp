@@ -13,7 +13,7 @@ struct TCP_PACKET_HEADER {
 };
 
 struct UDP_PACKET_HEADER {
-  short packet_size; // It can be changed
+  short packet_size;
   short packet_id;
 };
 
