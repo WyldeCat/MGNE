@@ -15,11 +15,12 @@
 
 #include <mgne/packet_queue.hpp>
 #include <mgne/pattern/thread_safe_queue.hpp>
+#include <mgne/pattern/thread_safe.hpp>
 #include <mgne/log/logger.hpp>
 #include <mgne/protocol.hpp>
 
 namespace mgne::tcp {
-class Socket {
+class Socket : mgne::pattern::ThreadSafe {
 public:
   Socket(boost::asio::io_service& io_service, PacketQueue& packet_queue,
     pattern::ThreadSafeQueue<int>& available_sessions, int session_id)
@@ -39,13 +40,17 @@ public:
     char* data = nullptr;
 
     if (immediately == false) {
+      Lock();
       data = new char[packet_size];
       memcpy(data, packet_data, packet_size);
       send_data_queue_.push_back(data);
+      Unlock();
     } else {
       data = packet_data;
     }
-    if (immediately == false && send_data_queue_.size() > 1) return;
+    if (immediately == false && send_data_queue_.size() > 1) {
+      return;
+    }
     boost::asio::async_write(socket_, boost::asio::buffer(data, packet_size),
       boost::bind(&Socket::handle_write, this,
       boost::asio::placeholders::error,
@@ -77,6 +82,7 @@ private:
   void handle_write(const boost::system::error_code& error,
     size_t bytes_transferred) 
   { 
+    Lock();
     delete[] send_data_queue_.front();
     send_data_queue_.pop_front();
 
@@ -85,6 +91,7 @@ private:
       TCP_PACKET_HEADER* header = (TCP_PACKET_HEADER*)data;
       Send(true, header->packet_size, header->packet_id, data);
     }
+    Unlock();
   }
 
   void handle_read(const boost::system::error_code& error,
@@ -145,7 +152,7 @@ private:
 }
 
 namespace mgne::udp {
-class Socket {
+class Socket : mgne::pattern::ThreadSafe {
 public:
   Socket(boost::asio::io_service& io_service,
     boost::asio::ip::udp::endpoint& endpoint,
@@ -164,11 +171,16 @@ public:
     char* data = nullptr;
     boost::asio::ip::udp::endpoint endpoint;
     if (immediately == false) {
+      Lock();
       data = new char[packet_size];
       endpoint = remote_endpoint;
+      std::cerr << "memcpy" << std::endl;
       memcpy(data, packet_data, packet_size);
+      std::cerr << "memcpy complete" << std::endl;
       send_endpoint_queue_.push_back(remote_endpoint);
       send_data_queue_.push_back(data);
+      std::cerr << "queue size " << send_data_queue_.size() << std::endl;
+      Unlock();
     } else {
       data = packet_data;
       endpoint = remote_endpoint;
@@ -217,9 +229,17 @@ private:
   void handle_write(const boost::system::error_code& error,
     size_t bytes_transferred)
   {
+    Lock();
+    if (send_data_queue_.size() == 0) {
+      Unlock();
+      return;
+    }
+    std::cerr << "delete " << std::endl;
+    std::cerr << "send data queue size " << send_data_queue_.size() << std::endl;
     delete[] send_data_queue_.front();
     send_data_queue_.pop_front();
     send_endpoint_queue_.pop_front();
+    std::cerr << "delete complete" << std::endl;
 
     if (send_data_queue_.empty() == false) {
       char* data = send_data_queue_.front();
@@ -227,6 +247,7 @@ private:
       Send(true, header->packet_size, header->packet_id, data,
         send_endpoint_queue_.front());
     }
+    Unlock();
   }
 
   void handle_read(const boost::system::error_code& error,

@@ -11,6 +11,8 @@
 
 #include <mgne/protocol.hpp>
 
+#include <iostream>
+
 namespace mgne::tcp {
 class Session;
 }
@@ -62,6 +64,7 @@ public:
 
   ~Packet()
   {
+    std::cout << "packet use count " << data_.use_count() << std::endl;
   }
 
   std::shared_ptr<std::vector<char>> GetPacketData()
