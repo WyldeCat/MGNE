@@ -174,12 +174,9 @@ public:
       Lock();
       data = new char[packet_size];
       endpoint = remote_endpoint;
-      std::cerr << "memcpy" << std::endl;
       memcpy(data, packet_data, packet_size);
-      std::cerr << "memcpy complete" << std::endl;
       send_endpoint_queue_.push_back(remote_endpoint);
       send_data_queue_.push_back(data);
-      std::cerr << "queue size " << send_data_queue_.size() << std::endl;
       Unlock();
     } else {
       data = packet_data;
@@ -234,12 +231,9 @@ private:
       Unlock();
       return;
     }
-    std::cerr << "delete " << std::endl;
-    std::cerr << "send data queue size " << send_data_queue_.size() << std::endl;
     delete[] send_data_queue_.front();
     send_data_queue_.pop_front();
     send_endpoint_queue_.pop_front();
-    std::cerr << "delete complete" << std::endl;
 
     if (send_data_queue_.empty() == false) {
       char* data = send_data_queue_.front();
