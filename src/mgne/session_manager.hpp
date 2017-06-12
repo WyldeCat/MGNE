@@ -199,6 +199,7 @@ private:
         socket = socket_map_[socket_id] =
           new Socket(io_services_[socket_id % (num_threads_ - 1) + 1], endpoint,
           packet_queue_);
+        socket->Receive();
       } else {
         socket = socket_map_[socket_id]; 
       }
@@ -207,9 +208,14 @@ private:
       sessions_[session_id] = new Session(session_id, remote_endpoint_, socket);
       header->packet_id = PACKET_ADMIT_ANS;
       header->packet_size = sizeof(UDP_PACKET_HEADER) + sizeof(short);
-      *((short*)(header + sizeof(UDP_PACKET_HEADER))) = socket->GetPort();
+      *((short*)(header + 1)) = socket->GetPort();
+      std::cerr << *((short*)(header + 1)) << std::endl;
+      accepting_socket_.send_to(boost::asio::buffer((char*)header,
+        header->packet_size), remote_endpoint_); // Need to be asynced
+      /*
       sessions_[session_id]->GetSocket()->Send(false, header->packet_size,
         header->packet_id, (char*)header, remote_endpoint_);
+      */
     }
     accept();
   }

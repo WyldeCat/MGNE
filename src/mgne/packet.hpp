@@ -45,30 +45,30 @@ public:
 
   Packet(short packet_size, short packet_id, const char* data,
     PacketType packet_type)
-    : data_(std::make_shared<std::vector<char>>(packet_size +
-      sizeof(TCP_PACKET_HEADER)))
-    , packet_size_(packet_size + sizeof(TCP_PACKET_HEADER))
+    : data_(std::make_shared<std::vector<char>>(packet_size_))
+    , packet_size_(packet_size + sizeof(UDP_PACKET_HEADER))
     , packet_id_(packet_id)
     , packet_type_(packet_type)
   {
     if (packet_type == PacketType::PACKET_TCP) {
       ((TCP_PACKET_HEADER*)data_->data())->packet_size = packet_size_;
       ((TCP_PACKET_HEADER*)data_->data())->packet_id = packet_id_;
-      memcpy(data_->data() + sizeof(TCP_PACKET_HEADER), data, packet_size_);
+      memcpy(data_->data() + sizeof(TCP_PACKET_HEADER), data, packet_size);
     } else {
       ((UDP_PACKET_HEADER*)data_->data())->packet_size = packet_size_;
       ((UDP_PACKET_HEADER*)data_->data())->packet_id = packet_id_;
-      memcpy(data_->data() + sizeof(UDP_PACKET_HEADER), data, packet_size_);
+      memcpy(data_->data() + sizeof(UDP_PACKET_HEADER), data, packet_size);
     }
   }
 
   ~Packet()
   {
-    std::cout << "packet use count " << data_.use_count() << std::endl;
+    std::cerr << "use count_ : " << data_.use_count() << std::endl;
   }
 
   std::shared_ptr<std::vector<char>> GetPacketData()
   {
+    std::cerr << "I'm GetPacketData()!!!!!!!\n";
     return data_;
   }
 

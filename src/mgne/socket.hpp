@@ -183,6 +183,7 @@ public:
       endpoint = remote_endpoint;
     }
     if (immediately == false && send_data_queue_.size() > 1) return;
+    std::cerr << "sending to " << endpoint.port() << std::endl;
     socket_.async_send_to(boost::asio::buffer(data, packet_size), endpoint,
       boost::bind(&Socket::handle_write, this,
       boost::asio::placeholders::error,
@@ -252,7 +253,7 @@ private:
     } else {
       int session_id = attached_sessions[ep2ll(remote_endpoint_)];
       UDP_PACKET_HEADER* header = (UDP_PACKET_HEADER*)recv_buffer_.data();
-      packet_queue_.Push(Packet((char*)header + sizeof(UDP_PACKET_HEADER),
+      packet_queue_.Push(Packet((char*)(header + 1),
         header->packet_size - sizeof(UDP_PACKET_HEADER), header->packet_id,
         session_id, Packet::PacketType::PACKET_UDP));
       Receive();
