@@ -63,12 +63,10 @@ public:
 
   ~Packet()
   {
-    std::cerr << "use count_ : " << data_.use_count() << std::endl;
   }
 
   std::shared_ptr<std::vector<char>> GetPacketData()
   {
-    std::cerr << "I'm GetPacketData()!!!!!!!\n";
     return data_;
   }
 
