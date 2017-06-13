@@ -9,7 +9,7 @@ Is std::mutex fair?
 #define _MGNE_THREAD_JOB_QUEUE_
 
 #include <iostream>
-
+#include <algorithm>
 #include <deque>
 #include <mutex>
 
