@@ -38,7 +38,6 @@ public:
     const short packet_id, char* packet_data)
   {
     char* data = nullptr;
-
     if (immediately == false) {
       Lock();
       data = new char[packet_size];
@@ -69,7 +68,6 @@ public:
   void Close() { close(); }
   short GetPort() { return socket_.local_endpoint().port(); }
   boost::asio::io_service& GetIOService() { return socket_.get_io_service(); }
-
   boost::asio::ip::tcp::socket& get_socket() { return socket_; }
 
 private:
@@ -83,6 +81,10 @@ private:
     size_t bytes_transferred) 
   { 
     Lock();
+    if (send_data_queue_.size() == 0) {
+      Unlock();
+      return;
+    }
     delete[] send_data_queue_.front();
     send_data_queue_.pop_front();
 

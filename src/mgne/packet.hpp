@@ -11,8 +11,6 @@
 
 #include <mgne/protocol.hpp>
 
-#include <iostream>
-
 namespace mgne::tcp {
 class Session;
 }
@@ -45,11 +43,12 @@ public:
 
   Packet(short packet_size, short packet_id, const char* data,
     PacketType packet_type)
-    : data_(std::make_shared<std::vector<char>>(packet_size_))
-    , packet_size_(packet_size + sizeof(UDP_PACKET_HEADER))
+    : data_(std::make_shared<std::vector<char>>())
+    , packet_size_(packet_size + sizeof(TCP_PACKET_HEADER))
     , packet_id_(packet_id)
     , packet_type_(packet_type)
   {
+    data_->resize(packet_size_);
     if (packet_type == PacketType::PACKET_TCP) {
       ((TCP_PACKET_HEADER*)data_->data())->packet_size = packet_size_;
       ((TCP_PACKET_HEADER*)data_->data())->packet_id = packet_id_;
