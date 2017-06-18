@@ -60,6 +60,10 @@ public:
       wqueue_->end());
     rqueue_->erase(std::remove(rqueue_->begin(), rqueue_->end(), t),
       rqueue_->end());
+
+    wqueue_size_ = wqueue_->size();
+    rqueue_size_ = rqueue_->size();
+
     rqueue_mutex_.unlock();
     wqueue_mutex_.unlock();
 
