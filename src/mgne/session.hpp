@@ -28,11 +28,11 @@ protected:
 namespace mgne::tcp {
 class Session : public BasicSession {
 public:
-  Session(int id, PacketQueue& packet_queue,
+  Session(int id, PacketQueue& packet_queue, void (*error_handler)(int),
     boost::asio::io_service& io_service,
     pattern::ThreadSafeQueue<int>& available_sessions)
     : BasicSession(id) 
-    , socket_(io_service, packet_queue, available_sessions, id_)
+    , socket_(io_service, packet_queue, error_handler, available_sessions, id_)
   { 
   }
 

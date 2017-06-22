@@ -22,12 +22,14 @@ namespace mgne::tcp {
 class SessionManager {
 public:
   SessionManager(size_t capacity, size_t num_threads,
-    boost::asio::ip::tcp::endpoint& endpoint, PacketQueue& packet_queue)
+    boost::asio::ip::tcp::endpoint& endpoint, PacketQueue& packet_queue,
+    void (*error_handler)(int))
     : capacity_(capacity) 
     , endpoint_(endpoint)
     , num_threads_(num_threads)
     , io_services_(num_threads)
     , packet_queue_(packet_queue)
+    , error_handler_(error_handler)
   {
     for (int i = 0; i < capacity_; i++) {
       sessions_.push_back(nullptr); 
@@ -73,6 +75,7 @@ private:
     available_sessions_.Pop(session_id);
     if (sessions_[session_id] != nullptr) delete sessions_[session_id];
     sessions_[session_id] = new Session(session_id, packet_queue_,
+      error_handler_,
       num_threads_ == 1 ? 
       io_services_[0] : io_services_[session_id % (num_threads_ - 1) + 1],
       available_sessions_);
@@ -103,7 +106,9 @@ private:
   std::vector<boost::asio::io_service> io_services_;
   std::vector<boost::asio::io_service::work> works_;
   pattern::ThreadSafeQueue<int> available_sessions_;
+
   PacketQueue& packet_queue_;
+  void (*error_handler_)(int);
 
 };
 }

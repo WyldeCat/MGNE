@@ -23,9 +23,11 @@ namespace mgne::tcp {
 class Socket : mgne::pattern::ThreadSafe {
 public:
   Socket(boost::asio::io_service& io_service, PacketQueue& packet_queue,
+    void (*error_handler)(int),
     pattern::ThreadSafeQueue<int>& available_sessions, int session_id)
     : socket_(io_service)
     , packet_queue_(packet_queue)
+    , error_handler_(error_handler)
     , available_sessions_(available_sessions)
     , session_id_(session_id)
   {
@@ -100,13 +102,7 @@ private:
     size_t bytes_transferred)
   {
     if (error) {
-      if (error == boost::asio::error::eof) {
-        // Close session
-        // Add handler
-      } else {
-        // Log
-        // TODO
-      }
+      error_handler_(session_id_); 
       close();
     } else {
       memcpy(&packet_buffer_[packet_buffer_mark_], receive_buffer_.data(),
@@ -144,6 +140,7 @@ private:
 
   boost::asio::ip::tcp::socket socket_;
   PacketQueue& packet_queue_;
+  void (*error_handler_)(int session_id);
   pattern::ThreadSafeQueue<int>& available_sessions_;
   std::array<char, 256> receive_buffer_;
   std::deque<char*> send_data_queue_;
@@ -185,7 +182,6 @@ public:
       endpoint = remote_endpoint;
     }
     if (immediately == false && send_data_queue_.size() > 1) return;
-    std::cerr << "sending to " << endpoint.port() << std::endl;
     socket_.async_send_to(boost::asio::buffer(data, packet_size), endpoint,
       boost::bind(&Socket::handle_write, this,
       boost::asio::placeholders::error,
@@ -211,7 +207,7 @@ public:
 
   std::unordered_map<long long,int>& GetAttachedSessions() 
   { 
-    return attached_sessions; 
+    return attached_sessions_; 
   }
 
   void Close() { close(); }
@@ -232,8 +228,7 @@ private:
     Lock();
     if (send_data_queue_.size() == 0) {
       Unlock();
-      return;
-    }
+      return; }
     delete[] send_data_queue_.front();
     send_data_queue_.pop_front();
     send_endpoint_queue_.pop_front();
@@ -250,10 +245,10 @@ private:
   void handle_read(const boost::system::error_code& error,
     size_t bytes_transferred)
   {
+    int session_id = attached_sessions_[ep2ll(remote_endpoint_)];
     if (error) {
-      // close session?
+
     } else {
-      int session_id = attached_sessions[ep2ll(remote_endpoint_)];
       UDP_PACKET_HEADER* header = (UDP_PACKET_HEADER*)recv_buffer_.data();
       packet_queue_.Push(Packet((char*)(header + 1),
         header->packet_size - sizeof(UDP_PACKET_HEADER), header->packet_id,
@@ -264,10 +259,11 @@ private:
 
   boost::asio::ip::udp::socket socket_;
   std::array<char, 256> recv_buffer_;
-  std::unordered_map<long long, int> attached_sessions;
+  std::unordered_map<long long, int> attached_sessions_;
   std::deque<char*> send_data_queue_;
   std::deque<boost::asio::ip::udp::endpoint> send_endpoint_queue_;
   boost::asio::ip::udp::endpoint remote_endpoint_;
+
   PacketQueue& packet_queue_;
 };
 }

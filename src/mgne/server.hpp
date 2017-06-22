@@ -48,10 +48,11 @@ class Server : public BasicServer {
 public:
   Server(boost::asio::ip::tcp::endpoint endpoint,
     size_t capacity, size_t num_io_threads, size_t num_pq_threads,
-    void (*packet_handler)(Packet&))
+    void (*packet_handler)(Packet&), void (*error_handler)(int))
     : BasicServer(capacity, num_pq_threads, packet_handler)
     , endpoint_(endpoint)
-    , session_manager_(capacity_, num_io_threads, endpoint_, packet_queue_)
+    , session_manager_(capacity_, num_io_threads, endpoint_, packet_queue_
+      , error_handler)
   {
   }
 
