@@ -33,7 +33,7 @@ public:
     } else if (rqueue_size_ == 0) {
       swap();
     }
-    t = rqueue_->front();
+    t = rqueue_->back();
     rqueue_->pop_back();
     rqueue_size_--;
     return true;
@@ -64,8 +64,8 @@ public:
     wqueue_size_ = wqueue_->size();
     rqueue_size_ = rqueue_->size();
 
-    rqueue_mutex_.unlock();
     wqueue_mutex_.unlock();
+    rqueue_mutex_.unlock();
 
     return ret;
   }
@@ -87,6 +87,8 @@ public:
   }
 
   ThreadJobQueue()
+    : wqueue_mutex_()
+    , rqueue_mutex_()
   {
     wqueue_size_ = 0;
     rqueue_size_ = 0;
@@ -105,7 +107,7 @@ private:
   void swap()
   { // It is certain that this thread obtains rqueue_mutex_,
     // when entering this function
-    std::lock_guard<std::mutex> lock(wqueue_mutex_);
+    wqueue_mutex_.lock();
 
     if (wqueue_ == &queues_[0]) {
       wqueue_ = &queues_[1];
@@ -117,6 +119,8 @@ private:
 
     rqueue_size_ = wqueue_size_;
     wqueue_size_ = 0;
+
+    wqueue_mutex_.unlock();
   }
 
 

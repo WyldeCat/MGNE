@@ -23,6 +23,7 @@ namespace mgne {
 class PacketAnalyzer;
 class Packet {
 public:
+  typedef std::shared_ptr<std::vector<char>> ptr;
   enum PacketType {
     PACKET_UDP,
     PACKET_TCP

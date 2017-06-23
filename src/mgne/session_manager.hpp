@@ -213,8 +213,8 @@ private:
       sessions_[session_id] = new Session(session_id, remote_endpoint_, socket);
       header->packet_id = PACKET_ADMIT_ANS;
       header->packet_size = sizeof(UDP_PACKET_HEADER) + sizeof(short);
-      *((short*)(header + 1)) = socket->GetPort();
-      std::cerr << *((short*)(header + 1)) << std::endl;
+      *((unsigned short*)(header + 1)) = socket->GetPort();
+      std::cerr << "port " << *((unsigned short*)(header + 1)) << std::endl;
       accepting_socket_.send_to(boost::asio::buffer((char*)header,
         header->packet_size), remote_endpoint_); // Need to be asynced
       /*

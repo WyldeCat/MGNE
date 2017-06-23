@@ -150,6 +150,7 @@ private:
 };
 }
 
+#include <iostream>
 namespace mgne::udp {
 class Socket : mgne::pattern::ThreadSafe {
 public:
@@ -159,6 +160,7 @@ public:
     : socket_(io_service, endpoint)
     , packet_queue_(packet_queue)
   {
+    std::cerr << "Socket port : " << GetPort() << std::endl;
   }
 
   ~Socket() { socket_.close(); }
